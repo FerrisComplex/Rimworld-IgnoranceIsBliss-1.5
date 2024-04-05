@@ -230,7 +230,7 @@ internal class Settings : ModSettings
         listing_Standard.GapLine(12f);
         listing_Standard.CheckboxLabeled("Empire is always eligible", ref SettingsHelper.LatestVersion.EmpireIsAlwaysEligible, "Will not prevent Empire from coming even if your tech level is low (you will be getting their traders if neutral/friends or raids otherwise)", 0f, 1f);
         listing_Standard.CheckboxLabeled("Mechanoids are always eligible", ref SettingsHelper.LatestVersion.MechanoidsAreAlwaysEligible, "Will not prevent Mechanoids from coming even if your tech level is low", 0f, 1f);
-        if (!LoadedModManager.RunningModsListForReading.Any(x => x.Name.EqualsIgnoreCase("[RH2] V.O.I.D. Storyteller") || x.Name.EqualsIgnoreCase("[RH2] Faction: V.O.I.D.")))
+        if (LoadedModManager.RunningModsListForReading.Any(x => x.Name.EqualsIgnoreCase("[RH2] V.O.I.D. Storyteller") || x.Name.EqualsIgnoreCase("[RH2] Faction: V.O.I.D.")))
             listing_Standard.CheckboxLabeled("Change V.O.I.D Events/Faction to Ultratech", ref SettingsHelper.LatestVersion.MechanoidsAreAlwaysEligible, "By Default this mod will not block V.O.I.D as they are set as a super low tech level!", 0f, 1f);
         listing_Standard.CheckboxLabeled("Debug output? Don't use unless necessary", ref SettingsHelper.LatestVersion.DebugOutput, "May dump some extra data to console", 0f, 1f);
         listing_Standard.GapLine(12f);
