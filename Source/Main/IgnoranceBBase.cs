@@ -142,12 +142,11 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static Faction GetRandomEligibleFaction()
         {
             IEnumerable<Faction> enumerable = from f in IgnoranceBase.HostileFactions()
-                where IgnoranceBase.TechIsEligibleForIncident(f.def.techLevel)
+                where IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f))
                 select f;
             if (enumerable != null && enumerable.Count<Faction>() > 0)
-            {
                 return enumerable.RandomElement<Faction>();
-            }
+            
 
             return null;
         }
@@ -156,7 +155,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> FactionsInRange()
         {
             return from f in IgnoranceBase.HostileFactions()
-                where IgnoranceBase.TechIsEligibleForIncident(f.def.techLevel)
+                where IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f))
                 select f;
         }
 
@@ -164,7 +163,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> TraderFactionsInRange()
         {
             return from f in IgnoranceBase.NonHostileFactions()
-                where IgnoranceBase.TechIsEligibleForIncident(f.def.techLevel)
+                where IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f))
                 select f;
         }
 
@@ -178,7 +177,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> FactionsBelow(TechLevel tech)
         {
             return from f in IgnoranceBase.HostileFactions()
-                where f.def.techLevel < tech && (IgnoranceBase.TechIsEligibleForIncident(f.def.techLevel) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
+                where f.def.techLevel < tech && (IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f)) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
                 select f;
         }
 
@@ -186,7 +185,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> FactionsAbove(TechLevel tech)
         {
             return from f in IgnoranceBase.HostileFactions()
-                where f.def.techLevel > tech && (IgnoranceBase.TechIsEligibleForIncident(f.def.techLevel) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
+                where f.def.techLevel > tech && (IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f)) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
                 select f;
         }
 
@@ -194,7 +193,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> FactionsEqual(TechLevel tech)
         {
             return from f in IgnoranceBase.HostileFactions()
-                where f.def.techLevel == tech && (IgnoranceBase.TechIsEligibleForIncident(f.def.techLevel) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
+                where f.def.techLevel == tech && (IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f)) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
                 select f;
         }
 
@@ -202,7 +201,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> TraderFactionsBelow(TechLevel tech)
         {
             return from f in IgnoranceBase.NonHostileFactions()
-                where f.def.techLevel < tech && (IgnoranceBase.TechIsEligibleForIncident(f.def.techLevel) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
+                where f.def.techLevel < tech && (IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f)) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
                 select f;
         }
 
@@ -210,7 +209,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> TraderFactionsAbove(TechLevel tech)
         {
             return from f in IgnoranceBase.NonHostileFactions()
-                where f.def.techLevel > tech && (IgnoranceBase.TechIsEligibleForIncident(f.def.techLevel) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
+                where f.def.techLevel > tech && (IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f)) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
                 select f;
         }
 
@@ -218,13 +217,20 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> TraderFactionsEqual(TechLevel tech)
         {
             return from f in IgnoranceBase.NonHostileFactions()
-                where f.def.techLevel == tech && (IgnoranceBase.TechIsEligibleForIncident(f.def.techLevel) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
+                where f.def.techLevel == tech && (IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f)) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
                 select f;
         }
 
+        public static TechLevel getFactionTechLevel(Faction faction)
+        {
+            return updateFactionTechLevel(faction);
+        }
 
         public static bool TechIsEligibleForIncident(TechLevel tech)
         {
+
+            
+            
             if (tech == TechLevel.Undefined)
             {
                 return true;
@@ -252,9 +258,28 @@ namespace DIgnoranceIsBliss.Core_Patches
         }
 
 
+        public static TechLevel updateFactionTechLevel(Faction faction)
+        {
+            if (SettingsHelper.LatestVersion.ChangeVoidTechLevel)
+            {
+                switch (faction.def.defName)
+                {
+                    case "rh2_nerotonin4_horde":
+                        return (TechLevel)Settings.N4RaidTechnologyLevel;
+                    case "rh_voidfactionbase":
+                    case "rh_factionbase_void":
+                    case "rh_void":
+                        return (TechLevel)Settings.VoidTechTechnologyLevel;
+                }
+            }
+
+            return faction.def.techLevel;
+        }
+        
+
         public static bool FactionInEligibleTechRange(Faction f)
         {
-            return IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f) || IgnoranceBase.TechIsEligibleForIncident(f.def.techLevel);
+            return IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f) || IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f));
         }
 
 
@@ -274,11 +299,11 @@ namespace DIgnoranceIsBliss.Core_Patches
         {
             {
                 typeof(IncidentWorker_MechCluster),
-                TechLevel.Ultra
+                TechLevel.Spacer
             },
             {
                 typeof(IncidentWorker_CrashedShipPart),
-                TechLevel.Ultra
+                TechLevel.Spacer
             },
             {
                 typeof(IncidentWorker_Infestation),
@@ -305,32 +330,34 @@ namespace DIgnoranceIsBliss.Core_Patches
             if (incidentDefNames.ContainsKey(eventName))
                 return TechIsEligibleForIncident(incidentDefNames.TryGetValue(eventName));
             // Ensure void is ultratech ffs
-            if (SettingsHelper.LatestVersion.ChangeVoidToUltratech)
+            if (SettingsHelper.LatestVersion.ChangeVoidTechLevel)
             {
                 switch (eventName)
                 {
+                    case "VOID_N4Manhunter_RedZone":
+                    case "VOID_N4Manhunter_DeathRow":
                     case "VOID_N4Event":
+                    case "VOID_VolatileLeaper_ShipPartCrash":
+                    case "VOID_BlackTitan_ShipPartCrash":
+                    case "VOID_DevilHound_ShipPartCrash":
+                    case "VOID_DefoliatorShipPartCrash":
+                        return TechIsEligibleForIncident((TechLevel)Settings.N4EventTechnologyLevel);
                     case "VOID_DroneEvent":
                     case "VOID_RedDevil_NegativeEvent":
                     case "VOID_NegativeEvent":
                     case "VOID_Black_NegativeEvent":
-                    case "VOID_VolatileLeaper_ShipPartCrash":
-                    case "VOID_BlackTitan_ShipPartCrash":
                     case "Void_Stalker":
-                    case "VOID_N4Manhunter_RedZone":
-                    case "VOID_N4Manhunter_DeathRow":
-                    case "VOID_DefoliatorShipPartCrash":
                     case "VOID_Endgame_NegativeEvent":
                     case "VOID_MechanoidShip":
-                    case "VOID_DevilHound_ShipPartCrash":
                     case "Void_PlanetKiller": // fuck u void
-                        return TechIsEligibleForIncident(TechLevel.Ultra);
-                }        
+                        return TechIsEligibleForIncident((TechLevel)Settings.VoidTechTechnologyLevel);
+                }
             }
+
             return true; // default is allowed
         }
-        
-        
+
+
         public static Dictionary<string, TechLevel> incidentDefNames = new Dictionary<string, TechLevel>
         {
             {
