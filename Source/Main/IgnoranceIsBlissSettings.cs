@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using DIgnoranceIsBliss.Core_Patches;
 using RimWorld;
 using UnityEngine;
@@ -254,6 +255,19 @@ internal class Settings : ModSettings
             VoidTechTechnologyLevel = (int)Math.Round(listing_Standard.SliderLabeled("V.O.I.D Actual Tech Level: " + (VoidTechTechnologyLevel == 0 ? "Always Eligable To Attack" : getTechLevelName(VoidTechTechnologyLevel)), VoidTechTechnologyLevel, (int)TechLevel.Animal, (int)TechLevel.Archotech, 0.5f, "The tech level to mark void events as"));
             N4EventTechnologyLevel = (int)Math.Round(listing_Standard.SliderLabeled("V.O.I.D N4 Events Tech Level: " + (N4EventTechnologyLevel == 0 ? "Always Eligable To Attack" : getTechLevelName(N4EventTechnologyLevel)), N4EventTechnologyLevel, (int)TechLevel.Animal, (int)TechLevel.Archotech, 0.5f, "The tech level to mark void N4 events as"));
             N4RaidTechnologyLevel = (int)Math.Round(listing_Standard.SliderLabeled("V.O.I.D N4 Raids Tech Level: " + (N4RaidTechnologyLevel == 0 ? "Always Eligable To Attack" : getTechLevelName(N4RaidTechnologyLevel)), N4RaidTechnologyLevel, (int)TechLevel.Animal, (int)TechLevel.Archotech, 0.5f, "The tech level to mark void N4 faction as"));
+
+            if (Current.Game != null)
+            {
+                var n4 = Find.FactionManager.AllFactions.FirstOrDefault(x => x.def.defName.EqualsIgnoreCase("RH2_Nerotonin4_Horde"));
+                if(n4 != null)
+                    n4.def.techLevel = (SettingsHelper.LatestVersion.ChangeVoidTechLevel ? (TechLevel)N4RaidTechnologyLevel : TechLevel.Animal);
+                    
+                
+                var voi = Find.FactionManager.AllFactions.FirstOrDefault(x => x.def.defName.EqualsIgnoreCase("RH_VOID"));
+                if(voi != null)
+                    voi.def.techLevel = (SettingsHelper.LatestVersion.ChangeVoidTechLevel ? (TechLevel)VoidTechTechnologyLevel : TechLevel.Ultra);
+            }
+            
         }
 
         listing_Standard.CheckboxLabeled("Debug output? Don't use unless necessary", ref SettingsHelper.LatestVersion.DebugOutput, "May dump some extra data to console", 0f, 1f);

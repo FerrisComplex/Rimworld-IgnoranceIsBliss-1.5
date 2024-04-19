@@ -177,7 +177,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> FactionsBelow(TechLevel tech)
         {
             return from f in IgnoranceBase.HostileFactions()
-                where f.def.techLevel < tech && (IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f)) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
+                where getFactionTechLevel(f) < tech && (IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
                 select f;
         }
 
@@ -185,7 +185,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> FactionsAbove(TechLevel tech)
         {
             return from f in IgnoranceBase.HostileFactions()
-                where f.def.techLevel > tech && (IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f)) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
+                where getFactionTechLevel(f) > tech && (IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
                 select f;
         }
 
@@ -193,7 +193,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> FactionsEqual(TechLevel tech)
         {
             return from f in IgnoranceBase.HostileFactions()
-                where f.def.techLevel == tech && (IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f)) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
+                where getFactionTechLevel(f) == tech && (IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
                 select f;
         }
 
@@ -201,7 +201,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> TraderFactionsBelow(TechLevel tech)
         {
             return from f in IgnoranceBase.NonHostileFactions()
-                where f.def.techLevel < tech && (IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f)) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
+                where getFactionTechLevel(f) < tech && (IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
                 select f;
         }
 
@@ -209,7 +209,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> TraderFactionsAbove(TechLevel tech)
         {
             return from f in IgnoranceBase.NonHostileFactions()
-                where f.def.techLevel > tech && (IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f)) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
+                where getFactionTechLevel(f) > tech && (IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
                 select f;
         }
 
@@ -217,7 +217,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> TraderFactionsEqual(TechLevel tech)
         {
             return from f in IgnoranceBase.NonHostileFactions()
-                where f.def.techLevel == tech && (IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f)) || IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
+                where getFactionTechLevel(f) == tech && (IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
                 select f;
         }
 
@@ -258,19 +258,13 @@ namespace DIgnoranceIsBliss.Core_Patches
         }
 
 
+
         public static TechLevel updateFactionTechLevel(Faction faction)
         {
             if (SettingsHelper.LatestVersion.ChangeVoidTechLevel)
             {
-                switch (faction.def.defName)
-                {
-                    case "rh2_nerotonin4_horde":
-                        return (TechLevel)Settings.N4RaidTechnologyLevel;
-                    case "rh_voidfactionbase":
-                    case "rh_factionbase_void":
-                    case "rh_void":
-                        return (TechLevel)Settings.VoidTechTechnologyLevel;
-                }
+                if(faction.def.defName.EqualsIgnoreCase("RH_VOID")) return (TechLevel)Settings.VoidTechTechnologyLevel;
+                if(faction.def.defName.EqualsIgnoreCase("RH2_Nerotonin4_Horde")) return (TechLevel)Settings.N4RaidTechnologyLevel;
             }
 
             return faction.def.techLevel;
