@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using DIgnoranceIsBliss.Core_Patches;
 using HarmonyLib;
-using IgnoranceIsBliss.Patches.Core;
 using RimWorld;
 using RimWorld.QuestGen;
 using Verse;
@@ -26,7 +25,6 @@ namespace DIgnoranceIsBliss
             Ferris.PatchHelper.RegisterPostfixPatch(typeof(ResearchManager), "FinishProject", null, typeof(Patch_FinishProject_Postfix));
             Ferris.PatchHelper.RegisterPostfixPatch(typeof(IncidentWorker_PawnsArrive), "CanFireNowSub", null, typeof(Patch_PawnsArriveCanFireNowSub_Postfix));
             Ferris.PatchHelper.RegisterPostfixPatch(typeof(StorytellerComp), "UsableIncidentsInCategory", new[] {typeof(IncidentCategoryDef), typeof(Func<IncidentDef, IncidentParms>) }, typeof(Patch_UsableIncidentsInCategory_Postfix));
-            Patch_OnInit.RegisterPatches();
         }
 
 

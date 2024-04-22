@@ -333,7 +333,6 @@
         <Compile Include="Patches\Core\Patch_CanRun_Prefix.cs" />
         <Compile Include="Patches\Core\Patch_FactionCanBeGroupSource_Postfix.cs" />
         <Compile Include="Patches\Core\Patch_FinishProject_Postfix.cs" />
-        <Compile Include="Patches\Core\Patch_OnInit.cs" />
         <Compile Include="Patches\Core\Patch_PawnsArriveCanFireNowSub_Postfix.cs" />
         <Compile Include="Patches\Core\Patch_TryGetRandomFactionForCombatPawnGroup_Prefix.cs" />
         <Compile Include="Patches\Core\Patch_UsableIncidentsInCategory_Postfix.cs" />

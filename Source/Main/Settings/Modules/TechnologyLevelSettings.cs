@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using DFerrisIgnorance.Compatability;
+using DIgnoranceIsBliss;
 using DIgnoranceIsBliss.Core_Patches;
 using RimWorld;
 using UnityEngine;
@@ -95,10 +96,33 @@ public class TechnologyLevelSettings : CategoryDef
     
     public override void OnMapInitialization()
     {
+        // Looping queue to ensure our techlevel is correct
+        if (!hasQueued)
+        {
+            hasQueued = true;
+            TechnologyQueueSetup();
+        }
+        
+        // Add a delay to loading the techlevel to allow for techadvancing to actually set the tech level first
+        Ferris.QueueHelper.AddAction(() =>
+        {
+            if (Current.Game != null && !UseHighestResearched) IgnoranceBase.PlayerTechLevel = IgnoranceBase.GetPlayerTech();
+        }, 60);
+        
+        
+        
         this.eventSettings.OnMapInitialization();
         this.factionSettings.OnMapInitialization();
         this.questSettings.OnMapInitialization();
     }
+
+    private static bool hasQueued = false;
+    private static void TechnologyQueueSetup()
+    {
+        if (Current.Game != null && UseActualTechLevel) IgnoranceBase.PlayerTechLevel = IgnoranceBase.GetPlayerTech();
+        Ferris.QueueHelper.AddAction(TechnologyQueueSetup, 2500);
+    }
+    
 
     public override void DoCategoryContents(Listing_Standard originalListing, string filter)
     {

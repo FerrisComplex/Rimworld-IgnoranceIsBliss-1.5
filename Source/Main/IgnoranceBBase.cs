@@ -248,6 +248,7 @@ namespace DIgnoranceIsBliss.Core_Patches
 
         public static bool FactionInEligibleTechRange(Faction f)
         {
+            
             return IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f) || IgnoranceBase.TechIsEligibleForIncident(FactionSettings.UpdateFactionTechLevel(f));
         }
 

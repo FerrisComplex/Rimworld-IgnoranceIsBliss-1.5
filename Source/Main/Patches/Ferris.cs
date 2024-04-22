@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using DFerrisIgnorance;
 using HarmonyLib;
 using Verse;
 
@@ -155,6 +156,59 @@ namespace DIgnoranceIsBliss
             }
         }
 
+        
+        // Our Queue Handler class
+        internal static class QueueHelper
+        {
+            private static long CurrentTick;
+
+            private static readonly List<QueuedAction> Actions = new List<QueuedAction>();
+
+            public static void Tick()
+            {
+                CurrentTick += 1;
+                for (int i = 0; i < Actions.Count; i++)
+                    if (Actions[i].Execute()) Actions.RemoveAt(i);
+            }
+
+            public static void AddAction(Action action, long ticksToDelay)
+            {
+                Actions.Add(new QueuedAction(action, CurrentTick + ticksToDelay));
+            }
+
+
+            private struct QueuedAction
+            {
+                private readonly Action EventAction;
+                private readonly long Tick;
+
+                public QueuedAction(Action action, long targetTick)
+                {
+                    Tick = targetTick;
+                    EventAction = action;
+                }
+
+                public bool Execute()
+                {
+                    if (CurrentTick >= Tick)
+                    {
+                        try
+                        {
+                            EventAction.Invoke();
+                        }
+                        catch (Exception e)
+                        {
+                            D.Error("Caught exception during queued event\n" + e);
+                        }
+
+                        return true;
+                    }
+
+                    return false;
+                }
+            }
+        }
+        
 
         // Our Harmony helper class
         internal static class PatchHelper
@@ -601,10 +655,53 @@ namespace DIgnoranceIsBliss
                 _patchTargets.Add(new PatchTarget.PatchArguments(AccessTools.TypeByName(targetClass), targetMethodName, parametersTarget, PatchTarget.PatchType.Finalizer, AccessTools.TypeByName(patchClass), patchName, patchParameters, callback).BuildPatch());
             }
 
-            
+            public class Patch_OnInit
+            {
+                public static void RegisterPatches()
+                {
+                    Ferris.PatchHelper.RegisterPostfixPatch(typeof(Game), "InitNewGame", null, typeof(Patch_OnInit), "OnLoad");
+                    Ferris.PatchHelper.RegisterPostfixPatch(typeof(Game), "LoadGame", null, typeof(Patch_OnInit), "OnLoad");
+                    Ferris.PatchHelper.RegisterPostfixPatch(typeof(TickManager), "DoSingleTick", null, typeof(Patch_OnInit), "Tick");
+                }
 
+                public static void Tick()
+                {
+                    QueueHelper.Tick();
+                }
+
+                public static void OnLoad()
+                {
+                    SettingsHelper.OnMapInitialization();
+                    for(int i = 0; i < MapLoadActions.Count; i++)
+                        try
+                        {
+                            MapLoadActions[i].Invoke();
+                        }
+                        catch (Exception e)
+                        {
+                            D.Error("Failed to run mapLoad!\n" + e);
+                        }
+                }
+            }
+
+            private static bool hasInitialized = false;
+
+            private static readonly List<Action> MapLoadActions = new List<Action>();
+
+            public static void RegisterMapLoadAction(Action action)
+            {
+                MapLoadActions.Add(action);
+            }
+            
             public static void ProcessRegisteredPatches(Harmony harmony)
             {
+                // Add our root patch
+                if (!hasInitialized)
+                {
+                    hasInitialized = true;
+                    Patch_OnInit.RegisterPatches();
+                }
+                
                 Text("Attempting to Process " + _patchTargets.Count + " Patches!");
                 int successful = 0;
                 // Run our patches
