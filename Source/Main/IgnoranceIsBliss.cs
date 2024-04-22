@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DFerrisIgnorance;
+using UnityEngine;
 using Verse;
 
 namespace DIgnoranceIsBliss
@@ -9,6 +10,7 @@ namespace DIgnoranceIsBliss
         
         public IgnoranceMod(ModContentPack content) : base(content)
         {
+            SettingsHelper.RegisterSettingModules(); // Register our modules first!
             SettingsHelper.LatestVersion = (base.GetSettings<Settings>() ?? new Settings());
         }
 
@@ -28,8 +30,13 @@ namespace DIgnoranceIsBliss
         
         public override void WriteSettings()
         {
-            Settings.WriteAll();
+            foreach (var allCategory in SettingsHelper.AllCategories)
+                allCategory.OnPreSave();
+            foreach (var allCategory in SettingsHelper.AllCategories)
+                allCategory.OnDoSave();
             base.WriteSettings();
+            foreach (var allCategory in SettingsHelper.AllCategories)
+                allCategory.OnPostSave();
         }
     }
 }

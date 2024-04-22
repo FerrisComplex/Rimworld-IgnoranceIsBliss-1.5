@@ -330,16 +330,32 @@
     <ItemGroup>
         <Compile Include="IgnoranceBBase.cs" />
         <Compile Include="IgnoranceIsBliss.cs"/>
-        <Compile Include="IgnoranceIsBlissSettings.cs"/>
         <Compile Include="Patches\Core\Patch_CanRun_Prefix.cs" />
         <Compile Include="Patches\Core\Patch_FactionCanBeGroupSource_Postfix.cs" />
         <Compile Include="Patches\Core\Patch_FinishProject_Postfix.cs" />
+        <Compile Include="Patches\Core\Patch_OnInit.cs" />
         <Compile Include="Patches\Core\Patch_PawnsArriveCanFireNowSub_Postfix.cs" />
         <Compile Include="Patches\Core\Patch_TryGetRandomFactionForCombatPawnGroup_Prefix.cs" />
         <Compile Include="Patches\Core\Patch_UsableIncidentsInCategory_Postfix.cs" />
         <Compile Include="Patches\Ferris.cs" />
         <Compile Include="Patches\HarmonyPatches.cs"/>
         <Compile Include="SettingsHelper.cs" />
+        <Compile Include="Settings\Base\Categories\CategoryDef.cs" />
+        <Compile Include="Settings\Base\Compatability\RequirementData.cs" />
+        <Compile Include="Settings\Base\Dialog_ColorPicker.cs" />
+        <Compile Include="Settings\Base\EnhancedListingStandard.cs" />
+        <Compile Include="Settings\Base\HSV.cs" />
+        <Compile Include="Settings\Base\ModuleUtils.cs" />
+        <Compile Include="Settings\Base\Module\SettingModuleExtensions.cs" />
+        <Compile Include="Settings\Base\Module\SettingsModuleBase.cs" />
+        <Compile Include="Settings\Base\Sections\SectionDef.cs" />
+        <Compile Include="Settings\Base\Sections\SubSectionDef.cs" />
+        <Compile Include="Settings\Base\SettingsUtils.cs" />
+        <Compile Include="Settings\Modules\EventSettings.cs" />
+        <Compile Include="Settings\Modules\FactionSettings.cs" />
+        <Compile Include="Settings\Modules\QuestSettings.cs" />
+        <Compile Include="Settings\Modules\TechnologyLevelSettings.cs" />
+        <Compile Include="Settings\Settings.cs" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Krafs.Publicizer">

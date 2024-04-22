@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using DFerrisIgnorance;
+using DFerrisIgnorance.Modules;
 using RimWorld;
 using Verse;
 
@@ -57,7 +59,7 @@ namespace DIgnoranceIsBliss.Core_Patches
 
         public static TechLevel GetPlayerTech()
         {
-            if (SettingsHelper.LatestVersion.UseHighestResearched)
+            if (TechnologyLevelSettings.UseHighestResearched)
             {
                 for (int i = 7; i > 0; i--)
                 {
@@ -79,7 +81,7 @@ namespace DIgnoranceIsBliss.Core_Patches
                 return TechLevel.Animal;
             }
 
-            if (SettingsHelper.LatestVersion.UsePercentResearched)
+            if (TechnologyLevelSettings.UsePercentResearched)
             {
                 int num = 0;
                 for (int j = 7; j > 0; j--)
@@ -97,7 +99,7 @@ namespace DIgnoranceIsBliss.Core_Patches
                             }
                         }
 
-                        if ((float)num / (float)IgnoranceBase.strataDic[(TechLevel)j].Count >= SettingsHelper.LatestVersion.PercentResearchNeeded)
+                        if ((float)num / (float)IgnoranceBase.strataDic[(TechLevel)j].Count >= TechnologyLevelSettings.PercentResearchNeeded)
                         {
                             return (TechLevel)j;
                         }
@@ -130,10 +132,7 @@ namespace DIgnoranceIsBliss.Core_Patches
             return Find.FactionManager.AllFactions.Where(delegate(Faction f)
             {
                 if (!f.IsPlayer && !f.defeated && !f.HostileTo(Faction.OfPlayer) && f.def.pawnGroupMakers != null)
-                {
-                    return f.def.pawnGroupMakers.Any((PawnGroupMaker x) => x.kindDef == PawnGroupKindDefOf.Combat);
-                }
-
+                    return f.def.pawnGroupMakers.Any(x => x.kindDef == PawnGroupKindDefOf.Combat);
                 return false;
             });
         }
@@ -142,7 +141,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static Faction GetRandomEligibleFaction()
         {
             IEnumerable<Faction> enumerable = from f in IgnoranceBase.HostileFactions()
-                where IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f))
+                where IgnoranceBase.TechIsEligibleForIncident(FactionSettings.UpdateFactionTechLevel(f))
                 select f;
             if (enumerable != null && enumerable.Count<Faction>() > 0)
                 return enumerable.RandomElement<Faction>();
@@ -155,7 +154,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> FactionsInRange()
         {
             return from f in IgnoranceBase.HostileFactions()
-                where IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f))
+                where IgnoranceBase.TechIsEligibleForIncident(FactionSettings.UpdateFactionTechLevel(f))
                 select f;
         }
 
@@ -163,7 +162,7 @@ namespace DIgnoranceIsBliss.Core_Patches
         public static IEnumerable<Faction> TraderFactionsInRange()
         {
             return from f in IgnoranceBase.NonHostileFactions()
-                where IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f))
+                where IgnoranceBase.TechIsEligibleForIncident(FactionSettings.UpdateFactionTechLevel(f))
                 select f;
         }
 
@@ -176,55 +175,40 @@ namespace DIgnoranceIsBliss.Core_Patches
 
         public static IEnumerable<Faction> FactionsBelow(TechLevel tech)
         {
-            return from f in IgnoranceBase.HostileFactions()
-                where getFactionTechLevel(f) < tech && (IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
-                select f;
+            return IgnoranceBase.HostileFactions().Where(x => x != null && (FactionSettings.UpdateFactionTechLevel(x) < tech || IgnoranceBase.EmpireIsEligible(x) || IgnoranceBase.MechanoidsAreEligible(x)));
         }
 
 
         public static IEnumerable<Faction> FactionsAbove(TechLevel tech)
         {
-            return from f in IgnoranceBase.HostileFactions()
-                where getFactionTechLevel(f) > tech && (IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
-                select f;
+            return IgnoranceBase.HostileFactions().Where(x => x != null && (FactionSettings.UpdateFactionTechLevel(x) > tech || IgnoranceBase.EmpireIsEligible(x) || IgnoranceBase.MechanoidsAreEligible(x)));
         }
 
 
         public static IEnumerable<Faction> FactionsEqual(TechLevel tech)
         {
-            return from f in IgnoranceBase.HostileFactions()
-                where getFactionTechLevel(f) == tech && (IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
-                select f;
+            return IgnoranceBase.HostileFactions().Where(x => x != null && (FactionSettings.UpdateFactionTechLevel(x) == tech || IgnoranceBase.EmpireIsEligible(x) || IgnoranceBase.MechanoidsAreEligible(x)));
         }
 
 
         public static IEnumerable<Faction> TraderFactionsBelow(TechLevel tech)
         {
-            return from f in IgnoranceBase.NonHostileFactions()
-                where getFactionTechLevel(f) < tech && (IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
-                select f;
+            return IgnoranceBase.NonHostileFactions().Where(x => x != null && (FactionSettings.UpdateFactionTechLevel(x) < tech || IgnoranceBase.EmpireIsEligible(x) || IgnoranceBase.MechanoidsAreEligible(x)));
         }
 
 
         public static IEnumerable<Faction> TraderFactionsAbove(TechLevel tech)
         {
-            return from f in IgnoranceBase.NonHostileFactions()
-                where getFactionTechLevel(f) > tech && (IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
-                select f;
+            return IgnoranceBase.NonHostileFactions().Where(x => x != null && (FactionSettings.UpdateFactionTechLevel(x) > tech || IgnoranceBase.EmpireIsEligible(x) || IgnoranceBase.MechanoidsAreEligible(x)));
         }
 
 
         public static IEnumerable<Faction> TraderFactionsEqual(TechLevel tech)
         {
-            return from f in IgnoranceBase.NonHostileFactions()
-                where getFactionTechLevel(f) == tech && (IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f))
-                select f;
+            return IgnoranceBase.NonHostileFactions().Where(x => x != null && (FactionSettings.UpdateFactionTechLevel(x) == tech || IgnoranceBase.EmpireIsEligible(x) || IgnoranceBase.MechanoidsAreEligible(x)));
         }
 
-        public static TechLevel getFactionTechLevel(Faction faction)
-        {
-            return updateFactionTechLevel(faction);
-        }
+
 
         public static bool TechIsEligibleForIncident(TechLevel tech)
         {
@@ -236,22 +220,22 @@ namespace DIgnoranceIsBliss.Core_Patches
                 return true;
             }
 
-            if (SettingsHelper.LatestVersion.UseFixedTechRange)
+            if (TechnologyLevelSettings.UseFixedTechRange)
             {
-                return (int)tech >= SettingsHelper.LatestVersion.FixedRange.min && (int)tech <= SettingsHelper.LatestVersion.FixedRange.max;
+                return (int)tech >= TechnologyLevelSettings.FixedRange.min && (int)tech <= TechnologyLevelSettings.FixedRange.max;
             }
 
             int playerTechLevel = (int)IgnoranceBase.PlayerTechLevel;
             if (playerTechLevel < (int)tech)
             {
-                if (SettingsHelper.LatestVersion.NumTechsAhead >= 0)
+                if (TechnologyLevelSettings.NumTechsAhead >= 0)
                 {
-                    return playerTechLevel + SettingsHelper.LatestVersion.NumTechsAhead >= (int)tech;
+                    return playerTechLevel + TechnologyLevelSettings.NumTechsAhead >= (int)tech;
                 }
             }
-            else if (playerTechLevel > (int)tech && SettingsHelper.LatestVersion.NumTechsBehind >= 0)
+            else if (playerTechLevel > (int)tech && TechnologyLevelSettings.NumTechsBehind >= 0)
             {
-                return playerTechLevel - SettingsHelper.LatestVersion.NumTechsBehind <= (int)tech;
+                return playerTechLevel - TechnologyLevelSettings.NumTechsBehind <= (int)tech;
             }
 
             return true;
@@ -259,33 +243,24 @@ namespace DIgnoranceIsBliss.Core_Patches
 
 
 
-        public static TechLevel updateFactionTechLevel(Faction faction)
-        {
-            if (SettingsHelper.LatestVersion.ChangeVoidTechLevel)
-            {
-                if(faction.def.defName.EqualsIgnoreCase("RH_VOID")) return (TechLevel)Settings.VoidTechTechnologyLevel;
-                if(faction.def.defName.EqualsIgnoreCase("RH2_Nerotonin4_Horde")) return (TechLevel)Settings.N4RaidTechnologyLevel;
-            }
 
-            return faction.def.techLevel;
-        }
         
 
         public static bool FactionInEligibleTechRange(Faction f)
         {
-            return IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f) || IgnoranceBase.TechIsEligibleForIncident(getFactionTechLevel(f));
+            return IgnoranceBase.EmpireIsEligible(f) || IgnoranceBase.MechanoidsAreEligible(f) || IgnoranceBase.TechIsEligibleForIncident(FactionSettings.UpdateFactionTechLevel(f));
         }
 
 
         private static bool EmpireIsEligible(Faction f)
         {
-            return f.def == FactionDefOf.Empire && SettingsHelper.LatestVersion.EmpireIsAlwaysEligible;
+            return f.def == FactionDefOf.Empire && FactionSettings.EmpireAlwaysEligable;
         }
 
 
         private static bool MechanoidsAreEligible(Faction f)
         {
-            return f.def == FactionDefOf.Mechanoid && SettingsHelper.LatestVersion.MechanoidsAreAlwaysEligible;
+            return f.def == FactionDefOf.Mechanoid && FactionSettings.MechanoidsAlwaysEligable;
         }
 
 
@@ -310,84 +285,9 @@ namespace DIgnoranceIsBliss.Core_Patches
         };
 
 
-        public static Dictionary<string, TechLevel> questScriptDefs = new Dictionary<string, TechLevel>
-        {
-            {
-                "ThreatReward_MechPods_MiscReward",
-                TechLevel.Ultra
-            }
-        };
-
-
-        public static bool IsTechEligableForEvent(string eventName)
-        {
-            if (incidentDefNames.ContainsKey(eventName))
-                return TechIsEligibleForIncident(incidentDefNames.TryGetValue(eventName));
-            // Ensure void is ultratech ffs
-            if (SettingsHelper.LatestVersion.ChangeVoidTechLevel)
-            {
-                switch (eventName)
-                {
-                    case "VOID_N4Manhunter_RedZone":
-                    case "VOID_N4Manhunter_DeathRow":
-                    case "VOID_N4Event":
-                    case "VOID_VolatileLeaper_ShipPartCrash":
-                    case "VOID_BlackTitan_ShipPartCrash":
-                    case "VOID_DevilHound_ShipPartCrash":
-                    case "VOID_DefoliatorShipPartCrash":
-                        return TechIsEligibleForIncident((TechLevel)Settings.N4EventTechnologyLevel);
-                    case "VOID_DroneEvent":
-                    case "VOID_RedDevil_NegativeEvent":
-                    case "VOID_NegativeEvent":
-                    case "VOID_Black_NegativeEvent":
-                    case "Void_Stalker":
-                    case "VOID_Endgame_NegativeEvent":
-                    case "VOID_MechanoidShip":
-                    case "Void_PlanetKiller": // fuck u void
-                        return TechIsEligibleForIncident((TechLevel)Settings.VoidTechTechnologyLevel);
-                }
-            }
-
-            return true; // default is allowed
-        }
-
-
-        public static Dictionary<string, TechLevel> incidentDefNames = new Dictionary<string, TechLevel>
-        {
-            {
-                "CrystalloidShipPartCrash",
-                TechLevel.Ultra
-            },
-            {
-                "RatkinTunnel_Guerrilla",
-                TechLevel.Industrial
-            },
-            {
-                "RatkinTunnel_Thief",
-                TechLevel.Industrial
-            },
-            {
-                "VFEM_BlackKnight",
-                TechLevel.Medieval
-            },
-            {
-                "PsychicEmitterActivationSW",
-                TechLevel.Spacer
-            },
-            {
-                "WeaponsCachePodCrashSW",
-                TechLevel.Spacer
-            },
-            {
-                "AA_Incident_BlackHive",
-                TechLevel.Spacer
-            }
-        };
-
-
+        public static Dictionary<string, TechLevel> questScriptDefs = new Dictionary<string, TechLevel>();
+        public static Dictionary<string, TechLevel> incidentDefNames = new Dictionary<string, TechLevel>();
         public static Dictionary<TechLevel, List<ResearchProjectDef>> strataDic = new Dictionary<TechLevel, List<ResearchProjectDef>>();
-
-
         private static TechLevel cachedTechLevel = TechLevel.Undefined;
     }
 }

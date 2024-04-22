@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <ModMetaData>
-	<name>Ignorance Is Bliss 1.5</name>
+	<name>Ignorance Is Bliss Reborn</name>
 	<author>Ferris, Dametri, GwinnBleidd</author>
 	<supportedVersions>
 		<li>1.1</li>
@@ -24,9 +24,19 @@
 		<li>Ludeon.RimWorld.Royalty</li>
 	</loadAfter>
 	<description>
+A Rewritten version of Ignorance Is Bliss
+
 Grants control over the tech level of factions that will visit you (whether via raid or other event).
 
-Changes From Original:
-- Added Option to restrict [RH] V.O.I.D events to be Ultratech rather than always available regardless of tech level
+New Features:
+- Configure TechLevel of All Events, Incidents and Factions
+- Better General Configuration
+- Optimized core code of the mod
+
+Notes:
+- Package ID will not be changed, im keeping with the original to allow compatability with old patches
+
+Original mod: https://steamcommunity.com/sharedfiles/filedetails/?id=2554423472
+
 	</description>
 </ModMetaData>

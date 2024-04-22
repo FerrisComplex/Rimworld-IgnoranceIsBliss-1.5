@@ -42,6 +42,43 @@ namespace DIgnoranceIsBliss
     // Our Core class
     internal static class Ferris
     {
+        internal class VarReference<T>
+        {
+            private readonly T DefaultValue;
+            private readonly Func<T> _get;
+            private readonly Action<T> _set;
+
+            public VarReference(Func<T> @get, Action<T> @set)
+            {
+                _get = @get;
+                _set = @set;
+                DefaultValue = _get();
+            }
+
+            public T getDefaultValue()
+            {
+                return DefaultValue;
+            }
+            public bool set(T value)
+            {
+                try
+                {
+                    _set(value);
+                    return true;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+
+            public T get()
+            {
+                return _get();
+            }
+
+        }
+        
         private static readonly string PREFIX = "[" + Assembly.GetExecutingAssembly().GetName().Name + "] ";
         private static void LOG(string line, string extraPrefix = "", Exception e = null, int level = 0)
         {
