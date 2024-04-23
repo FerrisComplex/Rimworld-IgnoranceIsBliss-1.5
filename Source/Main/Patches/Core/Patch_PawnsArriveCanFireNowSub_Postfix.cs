@@ -9,7 +9,7 @@ namespace DIgnoranceIsBliss.Core_Patches
     {
         public static void Postfix(ref IncidentParms parms, ref bool __result)
         {
-            if (!__result || !QuestSettings.ChangeQuests || parms.faction == null || IgnoranceBase.FactionInEligibleTechRange(parms.faction)) return;
+            if (!__result || parms.faction == null || IgnoranceBase.FactionInEligibleTechRange(parms.faction)) return;
             Faction randomEligibleFaction = IgnoranceBase.GetRandomEligibleFaction();
             if (randomEligibleFaction != null) parms.faction = randomEligibleFaction;
             

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DIgnoranceIsBliss;
 using DIgnoranceIsBliss.Core_Patches;
 using RimWorld;
 using UnityEngine;
@@ -127,14 +128,9 @@ public class FactionSettings : SettingsModuleBase
                 TechMenuFactions(originalListing, v.LabelCap.NullOrEmpty() ? v.label.NullOrEmpty() ? v.defName : v.label : v.LabelCap, v.techLevel, v.description.NullOrEmpty() ? "No Description" : v.description, (TechLevel)reference, -1, buttonSize, (x) =>
                 {
                     if ((int)x == 128)
-                    {
                         ManualRequirements.Remove(v.defName);
-                        
-                    }
                     else
-                    {
                         ManualRequirements.SetOrAdd(v.defName, (int)x);
-                    }
                 });
             }
 
@@ -172,15 +168,6 @@ public class FactionSettings : SettingsModuleBase
         Look(ref EmpireAlwaysEligable, "EmpireAlwaysEligable", true);
         Look(ref MechanoidsAlwaysEligable, "MechanoidsAlwaysEligable", true);
         Look(ref ModModificationsAllowed, "ModModificationsAllowed", true);
-
-        foreach (var v in DefDatabase<FactionDef>.AllDefs.OrderBy(x => x != null && x.modContentPack != null && x.modContentPack.IsCoreMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null && x.modContentPack.IsOfficialMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null ? x.modContentPack.loadOrder : int.MaxValue - 1))
-        {
-            var value = ManualRequirements.TryGetValue(v.defName, out var valueResult) ? valueResult : -999;
-            Look(ref value, "ManualRequirements." + v.defName, -999);
-            if (value == -999)
-                ManualRequirements.Remove(v.defName);
-            else
-                ManualRequirements.SetOrAdd(v.defName, value);
-        }
+        LookDictionary(ref ManualRequirements, "ManualRequirements");
     }
 }

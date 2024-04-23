@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using DIgnoranceIsBliss;
 using DIgnoranceIsBliss.Core_Patches;
 using RimWorld;
 using UnityEngine;
@@ -11,7 +12,10 @@ public class EventSettings : SettingsModuleBase
 {
     private static EventSettings settings;
 
-    private Dictionary<string, int> ManualRequirements = new Dictionary<string, int>()
+    private Dictionary<string, int> ManualRequirements = new Dictionary<string, int>();
+
+
+    private Dictionary<string, int> DefaultValuesInternal = new Dictionary<string, int>()
     {
         {
             "CrystalloidShipPartCrash",
@@ -43,12 +47,13 @@ public class EventSettings : SettingsModuleBase
         }
     };
 
-    
 
     public static bool IsTechEligableForEvent(IncidentDef def)
     {
         if (settings != null && settings.ManualRequirements.TryGetValue(def.defName, out var baseResult)) return IgnoranceBase.TechIsEligibleForIncident((TechLevel)baseResult);
+        if (settings != null && settings.DefaultValuesInternal.TryGetValue(def.defName, out var baseResult2)) return IgnoranceBase.TechIsEligibleForIncident((TechLevel)baseResult2);
         if (ModModificationsAllowed && IgnoranceBase.incidentWorkers.TryGetValue(def.workerClass, out var result)) return IgnoranceBase.TechIsEligibleForIncident(result);
+        
         return true;
     }
 
@@ -61,7 +66,6 @@ public class EventSettings : SettingsModuleBase
     public EventSettings()
     {
         settings = this;
-
     }
 
 
@@ -89,9 +93,7 @@ public class EventSettings : SettingsModuleBase
             var lastIndex = -1;
             bool shouldSkip = false;
 
-            
-            
-            
+
             List<IncidentDef> invalidDefs = new List<IncidentDef>();
 
             float buttonSize = Text.CalcSize("Not Forced TechLevel").x + 30;
@@ -142,6 +144,7 @@ public class EventSettings : SettingsModuleBase
                         ManualRequirements.SetOrAdd(v.defName, (int)x);
                 });
             }
+
             originalListing.Gap();
         }
     }
@@ -156,16 +159,6 @@ public class EventSettings : SettingsModuleBase
     public override void OnExposeData()
     {
         Look(ref ModModificationsAllowed, "ModModificationsAllowed", true);
-
-        
-        foreach (var v in DefDatabase<IncidentDef>.AllDefs.OrderBy(x => x != null && x.modContentPack != null && x.modContentPack.IsCoreMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null && x.modContentPack.IsOfficialMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null ? x.modContentPack.loadOrder : int.MaxValue - 1))
-        {
-            var value = ManualRequirements.TryGetValue(v.defName, out var valueResult) ? valueResult : -999;
-            Look(ref value, "ManualRequirements." + v.defName, -999);
-            if (value == -999)
-                ManualRequirements.Remove(v.defName);
-            else
-                ManualRequirements.SetOrAdd(v.defName, value);
-        }
+        LookDictionary(ref ManualRequirements, "ManualRequirements");
     }
 }

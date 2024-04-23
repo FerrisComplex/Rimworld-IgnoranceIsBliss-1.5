@@ -10,7 +10,7 @@ namespace DIgnoranceIsBliss.Core_Patches
     {
         public static bool Prefix(ref bool __result, QuestScriptDef __instance)
         {
-            if (QuestSettings.ChangeQuests && IgnoranceBase.questScriptDefs.TryGetValue(__instance.defName, out var tech) && !IgnoranceBase.TechIsEligibleForIncident(tech))
+            if (QuestSettings.ChangeQuests && !QuestSettings.IsEligableForQuest(__instance))
             {
                 __result = false;
                 return false;

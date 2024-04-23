@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DIgnoranceIsBliss;
+using DIgnoranceIsBliss.Core_Patches;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -9,7 +11,9 @@ namespace DFerrisIgnorance.Modules;
 
 public class QuestSettings : SettingsModuleBase
 {
-    private Dictionary<string, int> ManualRequirements = new Dictionary<string, int>()
+    private Dictionary<string, int> ManualRequirements = new Dictionary<string, int>();
+    
+    private Dictionary<string, int> DefaultValuesInternal = new Dictionary<string, int>()
     {
         {
             "ThreatReward_MechPods_MiscReward",
@@ -17,14 +21,33 @@ public class QuestSettings : SettingsModuleBase
         }
     };
 
+    private static QuestSettings settings;
+    
+    public static bool IsEligableForQuest(QuestScriptDef def)
+    {
+        if (def == null) return true;
+        if (settings != null && settings.ManualRequirements.TryGetValue(def.defName, out var value) && value >= 0 && value <= 7) return IgnoranceBase.TechIsEligibleForIncident((TechLevel)value);
+        if (settings != null && settings.DefaultValuesInternal.TryGetValue(def.defName, out var value2) && value2 >= 0 && value2 <= 7) return IgnoranceBase.TechIsEligibleForIncident((TechLevel)value2);
+        return IgnoranceBase.questScriptDefs.TryGetValue(def.defName, out var tech) && IgnoranceBase.TechIsEligibleForIncident(tech);
+    }
+
+    public QuestSettings()
+    {
+        settings = this;
+    }
+    
+    // QuestScriptDef
+    // IgnoranceBase.questScriptDefs.TryGetValue(__instance.defName, out var tech) && !IgnoranceBase.TechIsEligibleForIncident(tech))
+
     public static bool showMenu = false;
     public static bool ChangeQuests = true;
     public static bool ModModificationsAllowed = true;
-
+    
     private static readonly Dictionary<ModContentPack, bool> IsCollapsed = new Dictionary<ModContentPack, bool>();
     private static bool _isInvalidCollapsed = true;
 
-
+    
+    
     public override void DoTweakContents(Listing_Standard originalListing, string filter = "")
     {
         originalListing.DoSettingBool(filter, "Restrict Quest threads", "Substitute quest factions for a faction in range. Will not change the quest description, but an appropriate faction will arrive.", ref ChangeQuests);
@@ -112,22 +135,15 @@ public class QuestSettings : SettingsModuleBase
         ChangeQuests = true;
         ModModificationsAllowed = true;
         ManualRequirements.Clear();
+        ManualRequirements.AddRange(DefaultValuesInternal);
     }
 
+    
 
     public override void OnExposeData()
     {
         Look(ref ChangeQuests, "ChangeQuests", true);
         Look(ref ModModificationsAllowed, "ModModificationsAllowed", true);
-        
-        foreach (var v in DefDatabase<QuestScriptDef>.AllDefs.OrderBy(x => x != null && x.modContentPack != null && x.modContentPack.IsCoreMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null && x.modContentPack.IsOfficialMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null ? x.modContentPack.loadOrder : int.MaxValue - 1))
-        {
-            var value = ManualRequirements.TryGetValue(v.defName, out var valueResult) ? valueResult : -999;
-            Look(ref value, "ManualRequirements." + v.defName, -999);
-            if (value == -999)
-                ManualRequirements.Remove(v.defName);
-            else
-                ManualRequirements.SetOrAdd(v.defName, value);
-        }
+        LookDictionary(ref ManualRequirements, "ManualRequirements");
     }
 }

@@ -53,7 +53,7 @@ public class TechnologyLevelSettings : CategoryDef
     {
         string text = "";
         foreach (Faction faction in factions)
-            text = (text.NullOrEmpty() ? "" : ", ") + faction.Name;
+            text += (text.NullOrEmpty() ? "" : ", ") + faction.Name;
         if (text.NullOrEmpty()) return "[none]";
         return text;
     }
