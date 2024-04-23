@@ -9,7 +9,13 @@ namespace DFerrisIgnorance.Modules;
 
 public class QuestSettings : SettingsModuleBase
 {
-    private Dictionary<string, int> ManualRequirements = new Dictionary<string, int>();
+    private Dictionary<string, int> ManualRequirements = new Dictionary<string, int>()
+    {
+        {
+            "ThreatReward_MechPods_MiscReward",
+            (int)TechLevel.Ultra
+        }
+    };
 
 
     public static bool ModifyQuestTechLevels = false;
@@ -116,14 +122,15 @@ public class QuestSettings : SettingsModuleBase
         Look(ref ModifyQuestTechLevels, "ModifyQuestTechLevels", false);
         Look(ref ChangeQuests, "ChangeQuests", true);
         Look(ref ModModificationsAllowed, "ModModificationsAllowed", true);
-        Look(ref ManualRequirements, "ManualRequirements", new Dictionary<string, int>()
-        {
-            {
-                "ThreatReward_MechPods_MiscReward",
-                (int)TechLevel.Ultra
-            }
-        });
         
-        ManualRequirements.RemoveAll(x => x.Value == 128 || x.Value == -1);
+        foreach (var v in DefDatabase<QuestScriptDef>.AllDefs.OrderBy(x => x != null && x.modContentPack != null && x.modContentPack.IsCoreMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null && x.modContentPack.IsOfficialMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null ? x.modContentPack.loadOrder : int.MaxValue - 1))
+        {
+            var value = ManualRequirements.TryGetValue(v.defName, out var valueResult) ? valueResult : -999;
+            Look(ref value, "ManualRequirements." + v.defName, value);
+            if (value == -999)
+                ManualRequirements.Remove(v.defName);
+            else
+                ManualRequirements.SetOrAdd(v.defName, value);
+        }
     }
 }

@@ -10,7 +10,38 @@ namespace DFerrisIgnorance.Modules;
 public class EventSettings : SettingsModuleBase
 {
     private static EventSettings settings;
-    private Dictionary<string, int> ManualRequirements = new Dictionary<string, int>();
+
+    private Dictionary<string, int> ManualRequirements = new Dictionary<string, int>()
+    {
+        {
+            "CrystalloidShipPartCrash",
+            (int)TechLevel.Ultra
+        },
+        {
+            "RatkinTunnel_Guerrilla",
+            (int)TechLevel.Industrial
+        },
+        {
+            "RatkinTunnel_Thief",
+            (int)TechLevel.Industrial
+        },
+        {
+            "VFEM_BlackKnight",
+            (int)TechLevel.Medieval
+        },
+        {
+            "PsychicEmitterActivationSW",
+            (int)TechLevel.Spacer
+        },
+        {
+            "WeaponsCachePodCrashSW",
+            (int)TechLevel.Spacer
+        },
+        {
+            "AA_Incident_BlackHive",
+            (int)TechLevel.Spacer
+        }
+    };
 
     
 
@@ -127,37 +158,16 @@ public class EventSettings : SettingsModuleBase
     {
         Look(ref ModModificationsAllowed, "ModModificationsAllowed", true);
         Look(ref ModifyEventTechLevels, "ModifyEventTechLevels", false);
-        Look(ref ManualRequirements, "ManualRequirements", new Dictionary<string, int>()
+
+        
+        foreach (var v in DefDatabase<IncidentDef>.AllDefs.OrderBy(x => x != null && x.modContentPack != null && x.modContentPack.IsCoreMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null && x.modContentPack.IsOfficialMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null ? x.modContentPack.loadOrder : int.MaxValue - 1))
         {
-            {
-                "CrystalloidShipPartCrash",
-                (int)TechLevel.Ultra
-            },
-            {
-                "RatkinTunnel_Guerrilla",
-                (int)TechLevel.Industrial
-            },
-            {
-                "RatkinTunnel_Thief",
-                (int)TechLevel.Industrial
-            },
-            {
-                "VFEM_BlackKnight",
-                (int)TechLevel.Medieval
-            },
-            {
-                "PsychicEmitterActivationSW",
-                (int)TechLevel.Spacer
-            },
-            {
-                "WeaponsCachePodCrashSW",
-                (int)TechLevel.Spacer
-            },
-            {
-                "AA_Incident_BlackHive",
-                (int)TechLevel.Spacer
-            }
-        });
-        ManualRequirements.RemoveAll(x => x.Value == 128 || x.Value == -1);
+            var value = ManualRequirements.TryGetValue(v.defName, out var valueResult) ? valueResult : -999;
+            Look(ref value, "ManualRequirements." + v.defName, value);
+            if (value == -999)
+                ManualRequirements.Remove(v.defName);
+            else
+                ManualRequirements.SetOrAdd(v.defName, value);
+        }
     }
 }
