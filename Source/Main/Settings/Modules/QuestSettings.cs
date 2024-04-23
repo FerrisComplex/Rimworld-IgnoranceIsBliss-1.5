@@ -17,8 +17,7 @@ public class QuestSettings : SettingsModuleBase
         }
     };
 
-
-    public static bool ModifyQuestTechLevels = false;
+    public static bool showMenu = false;
     public static bool ChangeQuests = true;
     public static bool ModModificationsAllowed = true;
 
@@ -37,9 +36,9 @@ public class QuestSettings : SettingsModuleBase
         originalListing.Label("Otherwise events can fire regardless of TechLevel, The default value is neolithic for ALL quests outside the above logic");
         originalListing.Label("Changing the settings will set the required TechLevel to the highest value between the system and your change");
         originalListing.Gap();
-        originalListing.DoSettingBool(filter, "Modify TechLevel of Certain Quests", "Allows Changing Specific Quests, ie changing V.O.I.D PlanetCracker event to only happen when above a certain tech level", ref ModifyQuestTechLevels);
+        originalListing.DoSettingBool(filter, "Show Menu", "Shows the menu, this is hidden by default cause im lazy to build a collapasable menu inside a calapsable menu!", ref showMenu);
         originalListing.Gap();
-        if (ModifyQuestTechLevels)
+        if (showMenu)
         {
             originalListing.Gap();
             if (originalListing.ButtonTextLabeled("", "Restore Section Defaults", TextAnchor.UpperLeft, null, null))
@@ -110,7 +109,6 @@ public class QuestSettings : SettingsModuleBase
 
     public override void OnReset()
     {
-        ModifyQuestTechLevels = true;
         ChangeQuests = true;
         ModModificationsAllowed = true;
         ManualRequirements.Clear();
@@ -119,14 +117,13 @@ public class QuestSettings : SettingsModuleBase
 
     public override void OnExposeData()
     {
-        Look(ref ModifyQuestTechLevels, "ModifyQuestTechLevels", false);
         Look(ref ChangeQuests, "ChangeQuests", true);
         Look(ref ModModificationsAllowed, "ModModificationsAllowed", true);
         
         foreach (var v in DefDatabase<QuestScriptDef>.AllDefs.OrderBy(x => x != null && x.modContentPack != null && x.modContentPack.IsCoreMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null && x.modContentPack.IsOfficialMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null ? x.modContentPack.loadOrder : int.MaxValue - 1))
         {
             var value = ManualRequirements.TryGetValue(v.defName, out var valueResult) ? valueResult : -999;
-            Look(ref value, "ManualRequirements." + v.defName, value);
+            Look(ref value, "ManualRequirements." + v.defName, -999);
             if (value == -999)
                 ManualRequirements.Remove(v.defName);
             else

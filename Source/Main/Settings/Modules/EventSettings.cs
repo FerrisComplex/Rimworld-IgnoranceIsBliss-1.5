@@ -54,7 +54,7 @@ public class EventSettings : SettingsModuleBase
 
 
     public static bool ModModificationsAllowed = true;
-    public static bool ModifyEventTechLevels = false;
+    public static bool showMenu = false;
     private static readonly Dictionary<ModContentPack, bool> IsCollapsed = new Dictionary<ModContentPack, bool>();
     private static bool _isInvalidCollapsed = true;
 
@@ -75,9 +75,9 @@ public class EventSettings : SettingsModuleBase
         originalListing.Label("Otherwise events can fire regardless of TechLevel, The default value is neolithic for ALL quests outside the above logic");
         originalListing.Label("Changing the settings will set the required TechLevel to the highest value between the system and your change");
         originalListing.Gap();
-        originalListing.DoSettingBool(filter, "Modify TechLevel of Certain Events", "Allows Changing Specific events/incidents to only happen when your above a certain tech level (IE Mechanator Ship is restricted to space by default, as mechanoids are \"spacer\" entities", ref ModifyEventTechLevels);
+        originalListing.DoSettingBool(filter, "Show Menu", "Shows the menu, this is hidden by default cause im lazy to build a collapasable menu inside a calapsable menu!", ref showMenu);
         originalListing.Gap();
-        if (ModifyEventTechLevels)
+        if (showMenu)
         {
             originalListing.Gap();
             if (originalListing.ButtonTextLabeled("", "Restore Section Defaults", TextAnchor.UpperLeft, null, null))
@@ -148,7 +148,6 @@ public class EventSettings : SettingsModuleBase
 
     public override void OnReset()
     {
-        ModifyEventTechLevels = false;
         ModModificationsAllowed = true;
         ManualRequirements.Clear();
     }
@@ -157,13 +156,12 @@ public class EventSettings : SettingsModuleBase
     public override void OnExposeData()
     {
         Look(ref ModModificationsAllowed, "ModModificationsAllowed", true);
-        Look(ref ModifyEventTechLevels, "ModifyEventTechLevels", false);
 
         
         foreach (var v in DefDatabase<IncidentDef>.AllDefs.OrderBy(x => x != null && x.modContentPack != null && x.modContentPack.IsCoreMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null && x.modContentPack.IsOfficialMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null ? x.modContentPack.loadOrder : int.MaxValue - 1))
         {
             var value = ManualRequirements.TryGetValue(v.defName, out var valueResult) ? valueResult : -999;
-            Look(ref value, "ManualRequirements." + v.defName, value);
+            Look(ref value, "ManualRequirements." + v.defName, -999);
             if (value == -999)
                 ManualRequirements.Remove(v.defName);
             else

@@ -19,8 +19,7 @@ public class FactionSettings : SettingsModuleBase
         settings = this;
     }
 
-    public static bool ModifyFactionTechLevels = false;
-    public static bool ModifiesRealTechLevels = false;
+    public static bool showMenu = false;
     public static bool ModModificationsAllowed = true;
     private static readonly Dictionary<ModContentPack, bool> IsCollapsed = new Dictionary<ModContentPack, bool>();
     private static bool _isInvalidCollapsed = true;
@@ -84,11 +83,11 @@ public class FactionSettings : SettingsModuleBase
         originalListing.DoSettingBool(filter, "The Empire is Always Eligable", "Allows Empire to always be able to raid/attack you regardless of tech!", ref EmpireAlwaysEligable);
         originalListing.DoSettingBool(filter, "Allow Other Mods to Inject TechLevel defaults into Factions", "Allow mod compatability to run, allowing mod devs to assign their own tech levels to factions\nChanging values in the bellow setting can override their defaults!", ref ModModificationsAllowed);
         originalListing.Gap();
-        originalListing.DoSettingBool(filter, "Modify TechLevel of Certain Factions", "Allows Changing Specific Factions, ie changing V.O.I.D N4 Mutants from neolithic to count as spacer", ref ModifyFactionTechLevels);
+        originalListing.DoSettingBool(filter, "Show Menu", "Shows the menu, this is hidden by default cause im lazy to build a collapasable menu inside a calapsable menu!", ref showMenu);
         originalListing.Gap();
         //originalListing.DoSettingBool(filter, "Modify Actual Faction TechLevel", "If enabled this changes the actual tech level of said faction! I do not recommend using this as it can cause things like ideology equipment to not be equipable or weapons not be usable causing pawns to spam drop their items when they visit or not be able to generate and lag like crazy when it attempts it!", ref ModifiesRealTechLevels);
         
-        if (ModifyFactionTechLevels)
+        if (showMenu)
         {
             originalListing.Gap();
             if (originalListing.ButtonTextLabeled("", "Restore Section Defaults", TextAnchor.UpperLeft, null, null))
@@ -161,8 +160,6 @@ public class FactionSettings : SettingsModuleBase
 
     public override void OnReset()
     {
-        ModifyFactionTechLevels = false;
-        ModifiesRealTechLevels = false;
         EmpireAlwaysEligable = true;
         ModModificationsAllowed = true;
         MechanoidsAlwaysEligable = true;
@@ -174,14 +171,12 @@ public class FactionSettings : SettingsModuleBase
     {
         Look(ref EmpireAlwaysEligable, "EmpireAlwaysEligable", true);
         Look(ref MechanoidsAlwaysEligable, "MechanoidsAlwaysEligable", true);
-        Look(ref ModifiesRealTechLevels, "ModifiesRealTechLevels", false);
-        Look(ref ModifyFactionTechLevels, "ModifyFactionTechLevels", false);
         Look(ref ModModificationsAllowed, "ModModificationsAllowed", true);
 
         foreach (var v in DefDatabase<FactionDef>.AllDefs.OrderBy(x => x != null && x.modContentPack != null && x.modContentPack.IsCoreMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null && x.modContentPack.IsOfficialMod ? 0 : 1).ThenBy(x => x != null && x.modContentPack != null ? x.modContentPack.loadOrder : int.MaxValue - 1))
         {
             var value = ManualRequirements.TryGetValue(v.defName, out var valueResult) ? valueResult : -999;
-            Look(ref value, "ManualRequirements." + v.defName, value);
+            Look(ref value, "ManualRequirements." + v.defName, -999);
             if (value == -999)
                 ManualRequirements.Remove(v.defName);
             else
