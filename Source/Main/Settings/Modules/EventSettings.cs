@@ -9,42 +9,14 @@ namespace DFerrisIgnorance.Modules;
 
 public class EventSettings : SettingsModuleBase
 {
-    private static readonly Dictionary<string, int> ManualRequirements = new Dictionary<string, int>()
-    {
-        {
-            "CrystalloidShipPartCrash",
-            (int)TechLevel.Ultra
-        },
-        {
-            "RatkinTunnel_Guerrilla",
-            (int)TechLevel.Industrial
-        },
-        {
-            "RatkinTunnel_Thief",
-            (int)TechLevel.Industrial
-        },
-        {
-            "VFEM_BlackKnight",
-            (int)TechLevel.Medieval
-        },
-        {
-            "PsychicEmitterActivationSW",
-            (int)TechLevel.Spacer
-        },
-        {
-            "WeaponsCachePodCrashSW",
-            (int)TechLevel.Spacer
-        },
-        {
-            "AA_Incident_BlackHive",
-            (int)TechLevel.Spacer
-        }
-    };
+    private static EventSettings settings;
+    private Dictionary<string, int> ManualRequirements = new Dictionary<string, int>();
 
+    
 
     public static bool IsTechEligableForEvent(IncidentDef def)
     {
-        if (ManualRequirements.TryGetValue(def.defName, out var baseResult)) return IgnoranceBase.TechIsEligibleForIncident((TechLevel)baseResult);
+        if (settings != null && settings.ManualRequirements.TryGetValue(def.defName, out var baseResult)) return IgnoranceBase.TechIsEligibleForIncident((TechLevel)baseResult);
         if (ModModificationsAllowed && IgnoranceBase.incidentWorkers.TryGetValue(def.workerClass, out var result)) return IgnoranceBase.TechIsEligibleForIncident(result);
         return true;
     }
@@ -57,8 +29,8 @@ public class EventSettings : SettingsModuleBase
 
     public EventSettings()
     {
+        settings = this;
 
-        
     }
 
 
@@ -155,13 +127,37 @@ public class EventSettings : SettingsModuleBase
     {
         Look(ref ModModificationsAllowed, "ModModificationsAllowed", true);
         Look(ref ModifyEventTechLevels, "ModifyEventTechLevels", false);
-        
-        foreach (var v in DefDatabase<ResearchProjectDef>.AllDefs)
+        Look(ref ManualRequirements, "ManualRequirements", new Dictionary<string, int>()
         {
-            var reference = ManualRequirements.TryGetValue(v.defName, -1);
-            Look(ref reference, v.defName, -1);
-            if (reference != -1)
-                ManualRequirements.SetOrAdd(v.defName, reference);
-        }
+            {
+                "CrystalloidShipPartCrash",
+                (int)TechLevel.Ultra
+            },
+            {
+                "RatkinTunnel_Guerrilla",
+                (int)TechLevel.Industrial
+            },
+            {
+                "RatkinTunnel_Thief",
+                (int)TechLevel.Industrial
+            },
+            {
+                "VFEM_BlackKnight",
+                (int)TechLevel.Medieval
+            },
+            {
+                "PsychicEmitterActivationSW",
+                (int)TechLevel.Spacer
+            },
+            {
+                "WeaponsCachePodCrashSW",
+                (int)TechLevel.Spacer
+            },
+            {
+                "AA_Incident_BlackHive",
+                (int)TechLevel.Spacer
+            }
+        });
+        ManualRequirements.RemoveAll(x => x.Value == 128 || x.Value == -1);
     }
 }

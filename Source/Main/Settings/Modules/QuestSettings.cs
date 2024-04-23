@@ -9,13 +9,7 @@ namespace DFerrisIgnorance.Modules;
 
 public class QuestSettings : SettingsModuleBase
 {
-    private static readonly Dictionary<string, int> ManualRequirements = new Dictionary<string, int>()
-    {
-        {
-            "ThreatReward_MechPods_MiscReward",
-            (int)TechLevel.Ultra
-        }
-    };
+    private Dictionary<string, int> ManualRequirements = new Dictionary<string, int>();
 
 
     public static bool ModifyQuestTechLevels = false;
@@ -122,12 +116,14 @@ public class QuestSettings : SettingsModuleBase
         Look(ref ModifyQuestTechLevels, "ModifyQuestTechLevels", false);
         Look(ref ChangeQuests, "ChangeQuests", true);
         Look(ref ModModificationsAllowed, "ModModificationsAllowed", true);
-        foreach (var v in DefDatabase<ResearchProjectDef>.AllDefs)
+        Look(ref ManualRequirements, "ManualRequirements", new Dictionary<string, int>()
         {
-            var reference = ManualRequirements.TryGetValue(v.defName, -1);
-            Look(ref reference, v.defName, -1);
-            if (reference != -1)
-                ManualRequirements.SetOrAdd(v.defName, reference);
-        }
+            {
+                "ThreatReward_MechPods_MiscReward",
+                (int)TechLevel.Ultra
+            }
+        });
+        
+        ManualRequirements.RemoveAll(x => x.Value == 128 || x.Value == -1);
     }
 }

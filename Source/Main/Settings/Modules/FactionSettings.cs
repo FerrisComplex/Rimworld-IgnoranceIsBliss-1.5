@@ -10,8 +10,14 @@ namespace DFerrisIgnorance.Modules;
 
 public class FactionSettings : SettingsModuleBase
 {
-    private static readonly Dictionary<string, int> ManualRequirements = new Dictionary<string, int>();
+    private static FactionSettings settings;
+    private Dictionary<string, int> ManualRequirements = new Dictionary<string, int>();
 
+
+    public FactionSettings()
+    {
+        settings = this;
+    }
 
     public static bool ModifyFactionTechLevels = false;
     public static bool ModifiesRealTechLevels = false;
@@ -25,7 +31,7 @@ public class FactionSettings : SettingsModuleBase
     
     public static TechLevel UpdateFactionTechLevel(Faction faction)
     {
-        if (ManualRequirements.TryGetValue(faction.def.defName, out var value) && value >= 0 && value <= 7) return (TechLevel)value;
+        if (settings != null && settings.ManualRequirements.TryGetValue(faction.def.defName, out var value) && value >= 0 && value <= 7) return (TechLevel)value;
         return faction.def.techLevel;
     }
     
@@ -171,12 +177,9 @@ public class FactionSettings : SettingsModuleBase
         Look(ref ModifiesRealTechLevels, "ModifiesRealTechLevels", false);
         Look(ref ModifyFactionTechLevels, "ModifyFactionTechLevels", false);
         Look(ref ModModificationsAllowed, "ModModificationsAllowed", true);
-        foreach (var v in DefDatabase<ResearchProjectDef>.AllDefs)
-        {
-            var reference = ManualRequirements.TryGetValue(v.defName, -1);
-            Look(ref reference, v.defName, -1);
-            if (reference != -1)
-                ManualRequirements.SetOrAdd(v.defName, reference);
-        }
+        Look(ref ManualRequirements, "ManualRequirements", new Dictionary<string, int>());
+        
+        
+        ManualRequirements.RemoveAll(x => x.Value == 128 || x.Value == -1);
     }
 }
