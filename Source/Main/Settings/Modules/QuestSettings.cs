@@ -28,7 +28,7 @@ public class QuestSettings : SettingsModuleBase
         if (def == null) return true;
         if (settings != null && settings.ManualRequirements.TryGetValue(def.defName, out var value) && value >= 0 && value <= 7) return IgnoranceBase.TechIsEligibleForIncident((TechLevel)value);
         if (settings != null && settings.DefaultValuesInternal.TryGetValue(def.defName, out var value2) && value2 >= 0 && value2 <= 7) return IgnoranceBase.TechIsEligibleForIncident((TechLevel)value2);
-        return IgnoranceBase.questScriptDefs.TryGetValue(def.defName, out var tech) && IgnoranceBase.TechIsEligibleForIncident(tech);
+        return !IgnoranceBase.questScriptDefs.TryGetValue(def.defName, out var tech) || IgnoranceBase.TechIsEligibleForIncident(tech);
     }
 
     public QuestSettings()
